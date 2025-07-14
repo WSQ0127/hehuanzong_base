@@ -5,23 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>合欢宗密报</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background: #f8f9fa linear-gradient(to bottom, #ffe4e1, #fff0f5);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
         }
+
         .container {
-            max-width: 800px;
-            margin-top: 50px;
+            max-width: 90%;
+            background-color: white;
+            padding: 80px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        h1 {
+            color: #ff69b4;
+        }
+
         .textarea-container {
             position: relative;
         }
+
+        .btn-copy {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 5px;
+        }
+
         .error-message {
             color: red;
             font-size: 0.9em;
             display: none;
             margin-top: 5px;
         }
+
         textarea {
             resize: vertical;
             min-height: 150px;
@@ -29,130 +53,155 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center mb-4">合欢宗密报</h1>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="textarea-container">
-                    <label for="originalText" class="form-label">原始文本</label>
-                    <textarea class="form-control" id="originalText" placeholder="输入要编码的文本"></textarea>
-                    <div id="originalError" class="error-message">请输入有效文本</div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="textarea-container">
-                    <label for="encodedText" class="form-label">编码后文本</label>
-                    <textarea class="form-control" id="encodedText" placeholder="输入要解码的文本"></textarea>
-                    <div id="encodedError" class="error-message">无效字符，请检查输入</div>
-                </div>
+<div class="container" style="height: 100%">
+    <h1 class="text-center mb-4">合欢宗密报</h1>
+    <div class="row" style="height: 100%">
+        <div class="col-md-6 mb-3" style="height: 100%">
+            <div class="textarea-container">
+                <label for="originalText" class="form-label">原始密语</label>
+                <textarea class="form-control" id="originalText" placeholder="输入要编码的密语"></textarea>
+                <button class="btn btn-sm btn-copy" onclick="copyToClipboard('originalText')">
+                    复制
+                </button>
+                <div id="originalError" class="error-message">请输入有效密语</div>
             </div>
         </div>
-        <div class="text-center mt-3">
-            <p class="text-muted">输入任一文本框内容，另一侧将实时显示转换结果</p>
+        <div class="col-md-6 mb-3">
+            <div class="textarea-container">
+                <label for="encodedText" class="form-label">秘报文本</label>
+                <textarea class="form-control" id="encodedText" placeholder="输入要解码的秘报"></textarea>
+                <button class="btn btn-sm btn-copy" onclick="copyToClipboard('encodedText')">
+                    复制
+                </button>
+                <div id="encodedError" class="error-message">无效秘报，请检查输入</div>
+            </div>
         </div>
     </div>
+    <footer class="text-center py-3 mt-4">
+        <a href="https://github.com/cuckoo711/hehuanzong_base" class="btn">
+            <i class="bi bi-github me-2" style="font-size: 0.9em; color: rgba(0,0,0,0.4);">
+                布谷布谷不咕鸟
+            </i>
+        </a>
+    </footer>
+</div>
 
-    <script>
-        const targetChars = [
-            "❤", "哇", "喵呜", "啾", "哟", "好大", "去了", "要坏掉了",
-            "呃哈", "啊", "喔", "咿", "呀", "嗯", "哈", "哼", "咕啾",
-            "唔", "快点", "不行", "爽", "不要", "停下", "~", "!"
-        ];
-        const targetLen = targetChars.length;
+<script>
+    const targetChars = [
+        "❤", "哇", "喵呜", "啾", "哟", "好大", "去了", "要坏掉了",
+        "呃哈", "啊", "喔", "咿", "呀", "嗯", "哈", "哼", "咕啾",
+        "唔", "快点", "不行", "爽", "不要", "停下", "~", "!"
+    ];
+    const targetLen = targetChars.length;
 
-        class EncryptDecryptSystem {
-            constructor() {
-                this.charMap = {};
-                this.reverseMap = {};
-                for (let i = 0; i < targetLen; i++) {
-                    this.charMap[i] = targetChars[i];
-                    this.reverseMap[targetChars[i]] = i;
-                }
-            }
-
-            encode(inputString) {
-                if (!inputString) return "";
-                const byteData = new TextEncoder().encode(inputString);
-                let num = BigInt(0);
-                for (let i = 0; i < byteData.length; i++) {
-                    num = num * BigInt(256) + BigInt(byteData[i]);
-                }
-                const encodedResult = [];
-                if (num === 0n) {
-                    encodedResult.push(targetChars[0]);
-                } else {
-                    while (num > 0n) {
-                        const digit = Number(num % BigInt(targetLen));
-                        encodedResult.push(targetChars[digit]);
-                        num = num / BigInt(targetLen);
-                    }
-                }
-                return encodedResult.reverse().join('');
-            }
-
-            decode(encodedString) {
-                if (!encodedString) return "";
-                let num = BigInt(0);
-                let skip = 0;
-                let currentChar = '';
-                for (let index = 0; index < encodedString.length; index++) {
-                    if (skip) {
-                        skip--;
-                        continue;
-                    }
-                    currentChar = encodedString[index];
-                    for (let i = index + 1; i <= encodedString.length; i++) {
-                        if (currentChar in this.reverseMap) break;
-                        if (i < encodedString.length) {
-                            currentChar += encodedString[i];
-                        }
-                    }
-                    skip = currentChar.length - 1;
-                    if (!(currentChar in this.reverseMap)) {
-                        throw new Error(`无效字符：${currentChar}`);
-                    }
-                    num = num * BigInt(targetLen) + BigInt(this.reverseMap[currentChar]);
-                }
-                const byteLen = Math.ceil(num.toString(2).length / 8);
-                const byteData = new Array(byteLen).fill(0);
-                for (let i = byteLen - 1; i >= 0; i--) {
-                    byteData[i] = Number(num % 256n);
-                    num = num / 256n;
-                }
-                return new TextDecoder().decode(new Uint8Array(byteData));
+    class EncryptDecryptSystem {
+        constructor() {
+            this.charMap = {};
+            this.reverseMap = {};
+            for (let i = 0; i < targetLen; i++) {
+                this.charMap[i] = targetChars[i];
+                this.reverseMap[targetChars[i]] = i;
             }
         }
 
-        const system = new EncryptDecryptSystem();
-
-        const originalText = document.getElementById('originalText');
-        const encodedText = document.getElementById('encodedText');
-        const originalError = document.getElementById('originalError');
-        const encodedError = document.getElementById('encodedError');
-
-        originalText.addEventListener('input', () => {
-            try {
-                encodedText.value = system.encode(originalText.value);
-                originalError.style.display = 'none';
-                encodedError.style.display = 'none';
-            } catch (e) {
-                originalError.textContent = '编码失败：' + e.message;
-                originalError.style.display = 'block';
-                encodedText.value = '';
+        encode(inputString) {
+            if (!inputString) return "";
+            const byteData = new TextEncoder().encode(inputString);
+            let num = BigInt(0);
+            for (let i = 0; i < byteData.length; i++) {
+                num = num * BigInt(256) + BigInt(byteData[i]);
             }
-        });
-
-        encodedText.addEventListener('input', () => {
-            try {
-                originalText.value = system.decode(encodedText.value);
-                encodedError.style.display = 'none';
-                originalError.style.display = 'none';
-            } catch (e) {
-                encodedError.textContent = '解码失败：' + e.message;
-                encodedError.style.display = 'block';
-                originalText.value = '';
+            const encodedResult = [];
+            if (num === 0n) {
+                encodedResult.push(targetChars[0]);
+            } else {
+                while (num > 0n) {
+                    const digit = Number(num % BigInt(targetLen));
+                    encodedResult.push(targetChars[digit]);
+                    num = num / BigInt(targetLen);
+                }
             }
+            return encodedResult.reverse().join('');
+        }
+
+        decode(encodedString) {
+            if (!encodedString) return "";
+            let num = BigInt(0);
+            let skip = 0;
+            let currentChar = '';
+            for (let index = 0; index < encodedString.length; index++) {
+                if (skip) {
+                    skip--;
+                    continue;
+                }
+                currentChar = encodedString[index];
+                for (let i = index + 1; i <= encodedString.length; i++) {
+                    if (currentChar in this.reverseMap) break;
+                    if (i < encodedString.length) {
+                        currentChar += encodedString[i];
+                    }
+                }
+                skip = currentChar.length - 1;
+                if (!(currentChar in this.reverseMap)) {
+                    throw new Error(`无效字符：${currentChar}`);
+                }
+                num = num * BigInt(targetLen) + BigInt(this.reverseMap[currentChar]);
+            }
+            const byteLen = Math.ceil(num.toString(2).length / 8);
+            const byteData = new Array(byteLen).fill(0);
+            for (let i = byteLen - 1; i >= 0; i--) {
+                byteData[i] = Number(num % 256n);
+                num = num / 256n;
+            }
+            return new TextDecoder().decode(new Uint8Array(byteData));
+        }
+    }
+
+    const system = new EncryptDecryptSystem();
+
+    const originalText = document.getElementById('originalText');
+    const encodedText = document.getElementById('encodedText');
+    const originalError = document.getElementById('originalError');
+    const encodedError = document.getElementById('encodedError');
+
+    originalText.addEventListener('input', () => {
+        try {
+            encodedText.value = system.encode(originalText.value);
+            originalError.style.display = 'none';
+            encodedError.style.display = 'none';
+        } catch (e) {
+            originalError.textContent = '编码失败：' + e.message;
+            originalError.style.display = 'block';
+            encodedText.value = '';
+        }
+    });
+
+    encodedText.addEventListener('input', () => {
+        try {
+            originalText.value = system.decode(encodedText.value);
+            encodedError.style.display = 'none';
+            originalError.style.display = 'none';
+        } catch (e) {
+            encodedError.textContent = '解码失败：' + e.message;
+            encodedError.style.display = 'block';
+            originalText.value = '';
+        }
+    });
+
+    function copyToClipboard(id) {
+        const textarea = document.getElementById(id);
+        textarea.select();
+        document.execCommand('copy');
+        alert('已复制到剪贴板');
+    }
+
+    function pasteFromClipboard(id) {
+        navigator.clipboard.readText().then(text => {
+            document.getElementById(id).value = text;
+        }).catch(err => {
+            alert('粘贴失败：' + err);
         });
-    </script>
+    }
+</script>
 </body>
 </html>

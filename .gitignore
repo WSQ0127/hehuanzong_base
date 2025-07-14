@@ -1,0 +1,37 @@
+# Python specific
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/
+.pytest_cache/
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+
+# macOS specific
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Environment files
+.env
+.venv/
+venv/
+
+# Build and dist folders
+dist/
+build/
+
+# Other common exclusions
+node_modules/
